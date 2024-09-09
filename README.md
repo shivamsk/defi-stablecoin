@@ -12,7 +12,12 @@
 
 ## Setup 
 - forge init 
-- forge install openzeppelin/openzeppelin-contracts --no-commit 
+- forge install openzeppelin/openzeppelin-contracts@v4.8.3 --no-commit
+
+## Issues: 
+- openzeppelin contracts import issue in vscode 
+    - https://github.com/Cyfrin/foundry-full-course-cu/discussions/1780#discussioncomment-9651251
+
 
 ## Foundry
 

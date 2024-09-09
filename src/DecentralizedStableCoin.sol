@@ -23,7 +23,7 @@
 // private
 // view & pure functions
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import {ERC20, ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -40,7 +40,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * It is a ERC20 token that can be minted and burned by the DSCEngine smart contract.
  * @notice
  */
-abstract contract DecentralizedStableCoin is ERC20Burnable, Ownable {
+contract DecentralizedStableCoin is ERC20Burnable, Ownable {
     error DecentralizedStableCoin_MustBeMoreThanZero();
     error DecentralizedStableCoin_BurnAmountExceedsBalance();
     error DecentralizedStableCoin_NotZeroAddress();
