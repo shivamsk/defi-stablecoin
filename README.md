@@ -1,3 +1,19 @@
+## Stablecoin 
+
+1. Relative Stability : Anchored or Pegged -> $1.00
+    1. Chainlink Price Feed 
+    2. Set a function to exchange ETH & BTC -> $$$
+2. Stability Mechanism(Minting) : Algorithmic ( Decentralized )
+    1. People can only mint the stable coin with enough collateral (coded)
+3. Collateral Type : Exogenous (Crypto)
+    1. wETH 
+    2. wBTC 
+
+
+## Setup 
+- forge init 
+- forge install openzeppelin/openzeppelin-contracts --no-commit 
+
 ## Foundry
 
 **Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
