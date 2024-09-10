@@ -13,11 +13,15 @@
 ## Setup 
 - forge init 
 - forge install openzeppelin/openzeppelin-contracts@v4.8.3 --no-commit
+- forge install smartcontractkit/chainlink-brownie-contracts@1.2.0 --no-commit
 
 ## Issues: 
 - openzeppelin contracts import issue in vscode 
     - https://github.com/Cyfrin/foundry-full-course-cu/discussions/1780#discussioncomment-9651251
 
+## References: 
+- https://docs.chain.link/data-feeds/price-feeds/addresses?network=ethereum&page=1&search=ETH+%2F+USD
+-  
 
 ## Foundry
 
