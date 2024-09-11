@@ -31,10 +31,11 @@ contract DSCEngine is ReentrancyGuard {
     // Errors
     ////////////////////
 
-    error DSCEngine_NeedsMoreThanZero();
-    error DSCEngine_TokenAddressesAndPriceFeedAddressesMustBeSameLength();
-    error DSCEngine_NotAllowedToken();
-    error DSCEngine_TransferFailed();
+    error DSCEngine__NeedsMoreThanZero();
+    error DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+    error DSCEngine__NotAllowedToken();
+    error DSCEngine__TransferFailed();
+    error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
 
     ////////////////////
     // State Variables
@@ -42,6 +43,10 @@ contract DSCEngine is ReentrancyGuard {
 
     uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
     uint256 private constant PRECISION = 1e18;
+    uint256 private constant LIQUIDATION_THRESHOLD = 50; // 200% overcollateralized
+    uint256 private constant LIQUIDATION_PRECISION = 100;
+    uint256 private constant MIN_HEALTH_FACTOR = 1;
+
     // Token to PriceFeed mapping
     //https://data.chain.link/feeds
     mapping(address token => address priceFeed) private s_priceFeeds;
@@ -65,14 +70,14 @@ contract DSCEngine is ReentrancyGuard {
 
     modifier moreThanZero(uint256 amount) {
         if (amount == 0) {
-            revert DSCEngine_NeedsMoreThanZero();
+            revert DSCEngine__NeedsMoreThanZero();
         }
         _;
     }
 
     modifier isAllowedToken(address token) {
         if (s_priceFeeds[token] == address(0)) {
-            revert DSCEngine_NotAllowedToken();
+            revert DSCEngine__NotAllowedToken();
         }
         _;
     }
@@ -84,7 +89,7 @@ contract DSCEngine is ReentrancyGuard {
     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddress, address dscAddress) {
         // USD PriceFeeds
         if (tokenAddresses.length != priceFeedAddress.length) {
-            revert DSCEngine_TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+            revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
         }
 
         // Ex: ETH/USD, BTC/USD ,MKR/USD etc
@@ -119,7 +124,7 @@ contract DSCEngine is ReentrancyGuard {
         // Interactions
         bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
         if (!success) {
-            revert DSCEngine_TransferFailed();
+            revert DSCEngine__TransferFailed();
         }
     }
 
@@ -145,6 +150,9 @@ contract DSCEngine is ReentrancyGuard {
      */
     function mintDsc(uint256 amountDscToMint) external moreThanZero(amountDscToMint) nonReentrant {
         s_DSCMinted[msg.sender] += amountDscToMint;
+
+        // If they minted too much
+        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     function burnDsc() external {}
@@ -175,11 +183,26 @@ contract DSCEngine is ReentrancyGuard {
         // total DSC Minted
         // total Collateral Value
         (uint256 totalDscMinted, uint256 collateralValueInUSD) = _getAccountInformation(user);
+        uint256 collateralAdjustedForThreshold = (collateralValueInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+
+        // $150 ETH  / 100 DSC
+        // 150 * 50  = 7500 / 100 = 75/100 < 1
+
+        // $1000 ETH / 100 DSC
+        // 1000 * 50  = 50000 / 100 =  500/100 > 1
+
+        return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }
 
+    /**
+     * Check health factor( Do they have enough collateral ? )
+     * Revert if they don't
+     */
     function _revertIfHealthFactorIsBroken(address user) internal view {
-        // 1. Check if they have enough collateral
-        // 2. Revert if they don't have good health factor
+        uint256 userHealthFactor = _healthFactor(user);
+        if (userHealthFactor < MIN_HEALTH_FACTOR) {
+            revert DSCEngine__BreaksHealthFactor(userHealthFactor);
+        }
     }
 
     ///////////////////////////////////
