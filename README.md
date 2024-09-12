@@ -15,6 +15,14 @@
 - forge install openzeppelin/openzeppelin-contracts@v4.8.3 --no-commit
 - forge install smartcontractkit/chainlink-brownie-contracts@1.2.0 --no-commit
 
+## Commands
+- 
+
+## Test
+- forge test
+- forge test --match-test testRevertsIfCollateralZero
+- forge test --fork-url $SEPOLIA_RPC_URL
+
 
 ## VSCode Setup
     - Install Solidity(Nomic) extension 
