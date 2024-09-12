@@ -15,6 +15,13 @@
 - forge install openzeppelin/openzeppelin-contracts@v4.8.3 --no-commit
 - forge install smartcontractkit/chainlink-brownie-contracts@1.2.0 --no-commit
 
+
+## VSCode Setup
+    - Install Solidity(Nomic) extension 
+        - Change the format settings to forge 
+    - Install codeium extension in VSCode for AI Pair programming
+
+
 ## Issues: 
 - openzeppelin contracts import issue in vscode 
     - https://github.com/Cyfrin/foundry-full-course-cu/discussions/1780#discussioncomment-9651251
