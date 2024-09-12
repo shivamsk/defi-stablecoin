@@ -21,7 +21,9 @@
 
 ## References: 
 - https://docs.chain.link/data-feeds/price-feeds/addresses?network=ethereum&page=1&search=ETH+%2F+USD
--  
+- Health Factor Calculation 
+    - https://github.com/Cyfrin/foundry-full-course-cu/discussions/368#discussioncomment-6478351
+
 
 ## Foundry
 
