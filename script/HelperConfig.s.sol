@@ -18,7 +18,7 @@ contract HelperConfig is Script {
     int256 private constant ETH_USD_PRICE = 2000e8;
     int256 private constant BTC_USD_PRICE = 1000e8;
 
-    int256 private constant DEFAULT_ANVIL_PRIVATE_KEY =
+    uint256 private constant DEFAULT_ANVIL_PRIVATE_KEY =
         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
 
     NetworkConfig public activeNetworkConfig;
@@ -41,7 +41,7 @@ contract HelperConfig is Script {
         });
     }
 
-    function getOrCreateAnvilEthConfig() public view returns (NetworkConfig memory) {
+    function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
         if (activeNetworkConfig.wethUsdPriceFeed != address(0)) {
             return activeNetworkConfig;
         }
@@ -54,10 +54,9 @@ contract HelperConfig is Script {
 
         MockV3Aggregator btcUsdPriceFeed = new MockV3Aggregator(DECIMALS, BTC_USD_PRICE);
         ERC20Mock wbtcMock = new ERC20Mock("WBTC", "WBTC", msg.sender, 1000e8);
-
         vm.stopBroadcast();
 
-        return new NetworkConfig({
+        return NetworkConfig({
             wethUsdPriceFeed: address(ethUsdPriceFeed),
             wbtcUsdPriceFeed: address(btcUsdPriceFeed),
             weth: address(wethMock),

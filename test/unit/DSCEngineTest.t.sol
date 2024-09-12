@@ -15,7 +15,7 @@ contract DSCEngineTest is Test {
     address ethUsdPriceFeed;
     address weth;
 
-    function setup() public {
+    function setUp() public {
         deployer = new DeployDSC();
         (dsc, dscEngine, config) = deployer.run();
         (ethUsdPriceFeed,, weth,,) = config.activeNetworkConfig();
