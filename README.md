@@ -29,6 +29,11 @@
         - Change the format settings to forge 
     - Install codeium extension in VSCode for AI Pair programming
 
+## 
+- Natspec Documenation
+- reentrant
+- indexed keyword in event
+- IERC20 - transfer vs transferFrom
 
 ## Issues: 
 - openzeppelin contracts import issue in vscode 
@@ -38,6 +43,9 @@
 - https://docs.chain.link/data-feeds/price-feeds/addresses?network=ethereum&page=1&search=ETH+%2F+USD
 - Health Factor Calculation 
     - https://github.com/Cyfrin/foundry-full-course-cu/discussions/368#discussioncomment-6478351
+- Aave Liquidation Calculation/ Health 
+    - https://docs.aave.com/developers/guides/liquidations
+    - https://chatgpt.com/share/66e345d6-c8fc-8008-b86d-d90a10586c5c
 
 
 ## Foundry
