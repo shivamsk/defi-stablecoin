@@ -21,7 +21,9 @@
 ## Test
 - forge test
 - forge test --match-test testRevertsIfCollateralZero
+- forge test --match-test testRevertsIfCollateralZero -vvvv
 - forge test --fork-url $SEPOLIA_RPC_URL
+- forge coverage
 
 
 ## VSCode Setup
