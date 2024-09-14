@@ -24,6 +24,8 @@
 - forge test --match-test testRevertsIfCollateralZero -vvvv
 - forge test --fork-url $SEPOLIA_RPC_URL
 - forge coverage
+- forge coverage --report debug
+    - To view the line items to add tests
 
 
 ## VSCode Setup
@@ -48,6 +50,10 @@
 - Aave Liquidation Calculation/ Health 
     - https://docs.aave.com/developers/guides/liquidations
     - https://chatgpt.com/share/66e345d6-c8fc-8008-b86d-d90a10586c5c
+- Test 
+    - Expect uint256 overflow/underflow error 
+        - https://chatgpt.com/share/66e58e08-3c90-8008-b0c6-08e9bacd7b14
+
 
 
 ## Foundry

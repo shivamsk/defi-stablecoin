@@ -72,7 +72,6 @@ contract DSCEngineTest is Test {
 
     function testRevertsIfCollateralZero() public {
         vm.startPrank(USER);
-        ERC20Mock(weth).approve(address(dsc), AMOUNT_COLLATERAL);
 
         vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
         dscEngine.depositCollateral(weth, 0);
@@ -105,5 +104,42 @@ contract DSCEngineTest is Test {
 
         assertEq(expectedTotalDscMinted, totalDscMinted);
         assertEq(expectedDepositAmount, AMOUNT_COLLATERAL);
+    }
+
+    /////////////////////////////////
+    //// Redeem Collateral Tests ///
+    /////////////////////////////////
+
+    function testRedeemRevertsWithCollateralAmountZero() public {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
+        dscEngine.redeemCollateral(weth, 0);
+        vm.stopPrank();
+    }
+
+    function testRedeemCollateralRevertsWithUnapprovedTokenCollateralAddress() public {
+        ERC20Mock randomToken = new ERC20Mock("RAN", "RAN", USER, AMOUNT_COLLATERAL);
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__NotAllowedToken.selector);
+        dscEngine.redeemCollateral(address(randomToken), AMOUNT_COLLATERAL);
+        vm.stopPrank();
+    }
+
+    function testRedeemCollateral_FailsIfNoCollateralDeposited() public {
+        vm.startPrank(USER);
+        // Expect the arithmetic underflow error (Panic(0x11))
+        vm.expectRevert(abi.encodeWithSignature("Panic(uint256)", 0x11));
+        dscEngine.redeemCollateral(weth, AMOUNT_COLLATERAL);
+        vm.stopPrank();
+    }
+
+    function testRedeemCollateral_FailsWithoutMintingDsc() public depositedCollateral {
+        vm.startPrank(USER);
+
+        // This error comes when the DSC is not minted and so the totalDscMinted = 0 in healthFactor calculation
+        // expected error: panic: division or modulo by zero (0x12
+        vm.expectRevert(abi.encodeWithSignature("Panic(uint256)", 0x12));
+        dscEngine.redeemCollateral(weth, AMOUNT_COLLATERAL);
+        vm.stopPrank();
     }
 }
