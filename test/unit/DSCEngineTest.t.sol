@@ -142,4 +142,49 @@ contract DSCEngineTest is Test {
         dscEngine.redeemCollateral(weth, AMOUNT_COLLATERAL);
         vm.stopPrank();
     }
+
+    ////////////////////////
+    //// Mint DSC Tests ///
+    ///////////////////////
+
+    function testMintDsc_FailsWithAmountZero() public {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
+        dscEngine.mintDsc(0);
+        vm.stopPrank();
+    }
+
+    function testMintDsc_AndGetA() public depositedCollateral {
+        vm.startPrank(USER);
+        dscEngine.mintDsc(4 ether);
+        vm.stopPrank();
+
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = dscEngine.getAccountInformation(USER);
+    }
+
+    // function testMintDsc_FailsIfHealthFactorIsBroken() public depositedCollateral {
+    //     vm.startPrank(USER);
+    //     uint256 randomHealthFactor = 0.98
+    //     vm.expectRevert(abi.encodeWithSignature("DSCEngine__BreaksHealthFactor(uint256)", invalidHealthFactor));
+
+    //     dscEngine.mintDsc(10001 ether);
+    //     vm.stopPrank();
+    // }
+
+    ////////////////////////
+    //// Burn DSC Tests ///
+    ///////////////////////
+
+    function testBurnDsc_FailsWithAmountZero() public {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
+        dscEngine.burnDsc(0);
+        vm.stopPrank();
+    }
+
+    function testBurnDsc_FailsWithHealthFactorBroken() public depositedCollateral {
+        vm.startPrank(USER);
+        dscEngine.mintDsc(10000 ether);
+        vm.stopPrank();
+    }
 }
