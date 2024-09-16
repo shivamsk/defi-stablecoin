@@ -368,6 +368,17 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     /**
+     * Check health factor( Do they have enough collateral ? )
+     * Revert if they don't
+     */
+    function _revertIfHealthFactorIsBroken(address user) internal view {
+        uint256 userHealthFactor = _healthFactor(user);
+        if (userHealthFactor < MIN_HEALTH_FACTOR) {
+            revert DSCEngine__BreaksHealthFactor(userHealthFactor);
+        }
+    }
+
+    /**
      * Returns how close to liquidation a user is
      * If a user goes below 1, then they can get liquidated.
      * @param user Address of the user
@@ -376,6 +387,8 @@ contract DSCEngine is ReentrancyGuard {
         // total DSC Minted
         // total Collateral Value
         (uint256 totalDscMinted, uint256 collateralValueInUSD) = _getAccountInformation(user);
+        // If the user deposited collateral but didn't mint any DSC, then the user's health factor should be max
+        if (totalDscMinted == 0) return type(uint256).max;
         uint256 collateralAdjustedForThreshold = (collateralValueInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
 
         // $150 ETH  / 100 DSC
@@ -385,16 +398,5 @@ contract DSCEngine is ReentrancyGuard {
         // 1000 * 50  = 50000 / 100 =  500/100 > 1
 
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
-    }
-
-    /**
-     * Check health factor( Do they have enough collateral ? )
-     * Revert if they don't
-     */
-    function _revertIfHealthFactorIsBroken(address user) internal view {
-        uint256 userHealthFactor = _healthFactor(user);
-        if (userHealthFactor < MIN_HEALTH_FACTOR) {
-            revert DSCEngine__BreaksHealthFactor(userHealthFactor);
-        }
     }
 }

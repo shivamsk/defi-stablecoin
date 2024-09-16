@@ -154,12 +154,13 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testMintDsc_AndGetA() public depositedCollateral {
+    function testMintDscAndGetAccountInformation() public depositedCollateral {
         vm.startPrank(USER);
         dscEngine.mintDsc(4 ether);
         vm.stopPrank();
 
-        (uint256 totalDscMinted, uint256 collateralValueInUsd) = dscEngine.getAccountInformation(USER);
+        (uint256 totalDscMinted,) = dscEngine.getAccountInformation(USER);
+        assertEq(4 ether, totalDscMinted);
     }
 
     // function testMintDsc_FailsIfHealthFactorIsBroken() public depositedCollateral {
@@ -182,9 +183,39 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testBurnDsc_FailsWithHealthFactorBroken() public depositedCollateral {
+    function testBurnDsc_Success() public depositedCollateral {
         vm.startPrank(USER);
-        dscEngine.mintDsc(10000 ether);
+        dscEngine.mintDsc(4 ether);
+        ERC20Mock(address(dsc)).approve(address(dscEngine), 3 ether);
+        dscEngine.burnDsc(3 ether);
         vm.stopPrank();
+
+        (uint256 totalDscMinted,) = dscEngine.getAccountInformation(USER);
+        assertEq(1 ether, totalDscMinted);
+    }
+
+    // function testBurnDsc_RevertsWithTransferFailed() public depositedCollateral {
+    //     vm.startPrank(USER);
+    //     dscEngine.mintDsc(4 ether);
+    //     // No User Approval to transfer
+    //     // ERC20Mock(address(dsc)).approve(address(dscEngine), 3 ether);
+    //     vm.expectRevert(DSCEngine.DSCEngine__TransferFailed.selector);
+    //     dscEngine.burnDsc(3 ether);
+    //     vm.stopPrank();
+    // }
+
+    ////////////////////////
+    //// Liquidate Tests ///
+    ///////////////////////
+
+    function testLiquidate_FailsWithAmountZero() public {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
+        dscEngine.liquidate(weth, USER, 0);
+        vm.stopPrank();
+    }
+
+    function testLiquidate_Success() public {
+        vm.startPrank(USER);
     }
 }

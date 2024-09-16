@@ -39,6 +39,19 @@
 - indexed keyword in event
 - IERC20 - transfer vs transferFrom
 
+## 
+- Fuzz Testing : 
+    - Random data to one function 
+    - Fuzzing = Stateless Fuzzing
+- Invariant Tests : 
+    - Random data and Random functional calls to many functions
+    - Invariant = Stateful Fuzzing 
+- Invariant : 
+    - property of our system that should always hold. 
+- invariant tests : 
+    - Stateful Fuzzing 
+
+
 ## Issues: 
 - openzeppelin contracts import issue in vscode 
     - https://github.com/Cyfrin/foundry-full-course-cu/discussions/1780#discussioncomment-9651251
@@ -53,6 +66,8 @@
 - Test 
     - Expect uint256 overflow/underflow error 
         - https://chatgpt.com/share/66e58e08-3c90-8008-b0c6-08e9bacd7b14
+- Invariant Testing 
+    - https://book.getfoundry.sh/forge/invariant-testing
 
 
 
