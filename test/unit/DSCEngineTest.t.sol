@@ -8,11 +8,19 @@ import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
 import {MockFailedTransferFrom} from "../mocks/MockFailedTransferFrom.sol";
+import {MockFailedMintDsc} from "../mocks/MockFailedMintDsc.sol";
+import {MockFailedMintDsc} from "../mocks/MockFailedMintDsc.sol";
+import {MockFailedTransfer} from "../mocks/MockFailedTransfer.sol";
+
 import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 
 import "forge-std/console.sol";
 
 contract DSCEngineTest is Test {
+    event CollateralRedeemed(
+        address indexed redeemedFrom, address indexed redeemedTo, address indexed token, uint256 amount
+    );
+
     DeployDSC deployer;
     DecentralizedStableCoin dsc;
     DSCEngine dscEngine;
@@ -202,12 +210,44 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testRedeemCollateral_FailsWithoutMintingDsc() public depositedCollateral {
-        vm.startPrank(user);
+    function testRevertsIfTransferFails() public {
+        // Arrange - Setup
+        address owner = msg.sender;
+        vm.prank(owner);
+        MockFailedTransfer mockDsc = new MockFailedTransfer();
+        tokenAddresses = [address(mockDsc)];
+        priceFeedAddresses = [ethUsdPriceFeed];
 
-        // This error comes when the DSC is not minted and so the totalDscMinted = 0 in healthFactor calculation
-        // expected error: panic: division or modulo by zero (0x12
-        vm.expectRevert(abi.encodeWithSignature("Panic(uint256)", 0x12));
+        vm.prank(owner);
+        DSCEngine mockDscEngine = new DSCEngine(tokenAddresses, priceFeedAddresses, address(mockDsc));
+        mockDsc.mint(user, AMOUNT_COLLATERAL);
+
+        vm.prank(owner);
+        mockDsc.transferOwnership(address(mockDscEngine));
+
+        // Arrange - User
+        vm.startPrank(user);
+        ERC20Mock(address(mockDsc)).approve(address(mockDscEngine), AMOUNT_COLLATERAL);
+
+        mockDscEngine.depositCollateral(address(mockDsc), AMOUNT_COLLATERAL);
+
+        vm.expectRevert(DSCEngine.DSCEngine__TransferFailed.selector);
+        mockDscEngine.redeemCollateral(address(mockDsc), AMOUNT_COLLATERAL);
+        vm.stopPrank();
+    }
+
+    function testCanRedeemCollateral() public depositedCollateral {
+        vm.startPrank(user);
+        dscEngine.redeemCollateral(weth, AMOUNT_COLLATERAL);
+        uint256 userBalance = ERC20Mock(weth).balanceOf(user);
+        assertEq(userBalance, AMOUNT_COLLATERAL);
+        vm.stopPrank();
+    }
+
+    function testEmitCollateralRedeemedEvent() public depositedCollateral {
+        vm.expectEmit(true, true, true, true, address(dscEngine));
+        emit CollateralRedeemed(user, user, weth, AMOUNT_COLLATERAL);
+        vm.startPrank(user);
         dscEngine.redeemCollateral(weth, AMOUNT_COLLATERAL);
         vm.stopPrank();
     }
@@ -223,6 +263,25 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
+    function testIfMintFails() public {
+        // Arrange - Setup
+        MockFailedMintDsc mockDsc = new MockFailedMintDsc();
+        tokenAddresses = [weth];
+        priceFeedAddresses = [ethUsdPriceFeed];
+        address owner = msg.sender;
+        vm.prank(owner);
+        DSCEngine mockDscEngine = new DSCEngine(tokenAddresses, priceFeedAddresses, address(mockDsc));
+        mockDsc.transferOwnership(address(mockDscEngine));
+
+        // Arrange - User
+        vm.startPrank(user);
+        ERC20Mock(weth).approve(address(dscEngine), AMOUNT_COLLATERAL);
+
+        dscEngine.depositCollateralAndMintDsc(weth, AMOUNT_COLLATERAL, amountToMint);
+        vm.expectRevert(DSCEngine.DSCEngine__MintFailed.selector);
+        vm.stopPrank();
+    }
+
     function testMintDscAndGetAccountInformation() public depositedCollateral {
         vm.startPrank(user);
         dscEngine.mintDsc(4 ether);
@@ -232,14 +291,18 @@ contract DSCEngineTest is Test {
         assertEq(4 ether, totalDscMinted);
     }
 
-    // function testMintDsc_FailsIfHealthFactorIsBroken() public depositedCollateral {
-    //     vm.startPrank(user);
-    //     uint256 randomHealthFactor = 0.98
-    //     vm.expectRevert(abi.encodeWithSignature("DSCEngine__BreaksHealthFactor(uint256)", invalidHealthFactor));
+    function testMintDsc_FailsIfHealthFactorIsBroken() public depositedCollateral {
+        (, int256 price,,,) = MockV3Aggregator(ethUsdPriceFeed).latestRoundData();
+        amountToMint =
+            (AMOUNT_COLLATERAL * (uint256(price) * dscEngine.getAdditionalFeedPrecision())) / dscEngine.getPrecision();
 
-    //     dscEngine.mintDsc(10001 ether);
-    //     vm.stopPrank();
-    // }
+        vm.startPrank(user);
+        uint256 expectedHealthFactor =
+            dscEngine.calculateHealthFactor(amountToMint, dscEngine.getUsdValue(weth, AMOUNT_COLLATERAL));
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, expectedHealthFactor));
+        dscEngine.mintDsc(amountToMint);
+        vm.stopPrank();
+    }
 
     ////////////////////////
     //// Burn DSC Tests ///
