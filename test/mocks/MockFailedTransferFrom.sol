@@ -26,4 +26,12 @@ contract MockFailedTransferFrom is ERC20Burnable, Ownable {
     function mint(address account, uint256 amount) public {
         _mint(account, amount);
     }
+
+    function transferFrom(
+        address, //sender
+        address, //recipient
+        uint256 //amount
+    ) public pure override returns (bool) {
+        return false;
+    }
 }

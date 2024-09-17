@@ -7,6 +7,7 @@ import {DeployDSC} from "../../script/DeployDSC.s.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
+import {MockFailedTransferFrom} from "../mocks/MockFailedTransferFrom.sol";
 import "forge-std/console.sol";
 
 contract DSCEngineTest is Test {
@@ -69,6 +70,33 @@ contract DSCEngineTest is Test {
     /////////////////////////////////
     //// Deposit Collateral Tests ///
     /////////////////////////////////
+
+    function testRevertsIfTransferFromFails() public {
+        // Arrange - Setup
+        address owner = msg.sender;
+        vm.prank(owner);
+        MockFailedTransferFrom mockDsc = new MockFailedTransferFrom();
+        tokenAddresses = [address(mockDsc)];
+        priceFeedAddresses = [ethUsdPriceFeed];
+
+        vm.prank(owner);
+        DSCEngine mockDscEngine = new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
+        mockDsc.mint(USER, AMOUNT_COLLATERAL);
+
+        vm.prank(owner);
+        mockDsc.transferOwnership(address(mockDscEngine));
+
+        // Arrange - User
+        vm.startPrank(USER);
+        // Get the approval from USER to transfer mockDsc Amount to transfer to mockDscEngine
+        ERC20Mock(address(mockDsc)).approve(address(mockDscEngine), AMOUNT_COLLATERAL);
+
+        // Act // Assert
+        vm.expectRevert(DSCEngine.DSCEngine__TransferFailed.selector);
+        mockDscEngine.depositCollateral(address(mockDsc), AMOUNT_COLLATERAL);
+
+        vm.stopPrank();
+    }
 
     function testRevertsIfCollateralZero() public {
         vm.startPrank(USER);
