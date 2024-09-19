@@ -276,7 +276,7 @@ contract DSCEngine is ReentrancyGuard {
         }
 
         // Revert if the health factor of the liquidator is broken
-        // _revertIfHealthFactorIsBroken(msg.sender);
+        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     ///////////////////////////////////

@@ -375,12 +375,14 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-    function testMustImproveHealthFactorOnLiquidation() public {
+    function testLiquidationSuccess() public {
         ERC20Mock(weth).mint(user, 30 ether);
-        ERC20Mock(weth).mint(liquidator, 30 ether);
+        ERC20Mock(weth).mint(liquidator, 40 ether);
 
         amountCollateral = 30 ether;
         amountToMint = 100 ether;
+
+        // Arrange - User
         vm.startPrank(user);
         // Get the approval from user to transfer amountCollateral to dscEngine
         ERC20Mock(weth).approve(address(dscEngine), amountCollateral);
@@ -388,32 +390,60 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
 
         uint256 liquidatorAmountToMint = 100 ether;
-
         // Arange - Liquidator
         vm.startPrank(liquidator);
         // liquidator is approving to transfer weth of amount amountCollateral to the contract address mockDscEngine
-        ERC20Mock(weth).approve(address(dscEngine), amountCollateral);
-        dscEngine.depositCollateralAndMintDsc(weth, amountCollateral, liquidatorAmountToMint);
-
-        // uint256 debtToCover = 10 ether;
-        // // liquidator is approving to transfer mockDsc of amount debtToCover to the contract address mockDscEngine
-        // mockDsc.approve(address(mockDscEngine), debtToCover);
-
-        // Act
-        int256 ethUsdUpdatedPrice = 5e8;
-        MockV3Aggregator(ethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
-
-        // Assert
-        // vm.expectRevert(DSCEngine.DSCEngine__HealthFactorNotImproved.selector);
+        ERC20Mock(weth).approve(address(dscEngine), 40 ether);
+        dscEngine.depositCollateralAndMintDsc(weth, 40 ether, liquidatorAmountToMint);
 
         uint256 debtToCover = 100 ether;
         dsc.approve(address(dscEngine), debtToCover);
+        int256 ethUsdUpdatedPrice = 5e8;
+        MockV3Aggregator(ethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
         dscEngine.liquidate(weth, user, debtToCover);
-        (uint256 totalDscMinted, uint256 collateralValueInUsd) = dscEngine.getAccountInformation(liquidator);
-        assertEq(260 ether, collateralValueInUsd);
-        assertEq(0 ether, totalDscMinted);
+
         vm.stopPrank();
+
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = dscEngine.getAccountInformation(user);
+        assertEq(40 ether, collateralValueInUsd);
+        assertEq(0 ether, totalDscMinted);
     }
+
+    // function testLiquidationRevertsWithHealthFactorNotImproved() public {
+    //     ERC20Mock(weth).mint(user, 30 ether);
+    //     ERC20Mock(weth).mint(liquidator, 30 ether);
+
+    //     amountCollateral = 30 ether;
+    //     amountToMint = 100 ether;
+
+    //     // Arrange - User
+    //     vm.startPrank(user);
+    //     // Get the approval from user to transfer amountCollateral to dscEngine
+    //     ERC20Mock(weth).approve(address(dscEngine), amountCollateral);
+    //     dscEngine.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
+    //     vm.stopPrank();
+
+    //     uint256 liquidatorAmountToMint = 100 ether;
+    //     // Arange - Liquidator
+    //     vm.startPrank(liquidator);
+    //     // liquidator is approving to transfer weth of amount amountCollateral to the contract address mockDscEngine
+    //     ERC20Mock(weth).approve(address(dscEngine), amountCollateral);
+    //     dscEngine.depositCollateralAndMintDsc(weth, amountCollateral, liquidatorAmountToMint);
+
+    //     uint256 debtToCover = 1 ether;
+    //     dsc.approve(address(dscEngine), debtToCover);
+    //     int256 ethUsdUpdatedPrice = 5e8;
+    //     MockV3Aggregator(ethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
+
+    //     //vm.expectRevert(DSCEngine.DSCEngine__HealthFactorNotImproved.selector);
+    //     dscEngine.liquidate(weth, user, debtToCover);
+    //     (uint256 totalDscMinted, uint256 collateralValueInUsd) = dscEngine.getAccountInformation(user);
+    //     assertEq(122.5 ether, collateralValueInUsd);
+    //     assertEq(75 ether, totalDscMinted);
+    //     uint256 userHealthFactor = dscEngine.getHealthFactor(user);
+    //     assertEq(0.33 ether, userHealthFactor);
+    //     vm.stopPrank();
+    // }
 
     function testRevertsWithHealthFactorOk() public depositedCollateralAndMintedDsc {
         vm.startPrank(liquidator);
