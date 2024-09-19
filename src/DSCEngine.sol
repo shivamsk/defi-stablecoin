@@ -276,7 +276,7 @@ contract DSCEngine is ReentrancyGuard {
         }
 
         // Revert if the health factor of the liquidator is broken
-        _revertIfHealthFactorIsBroken(msg.sender);
+        // _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     ///////////////////////////////////
@@ -309,8 +309,6 @@ contract DSCEngine is ReentrancyGuard {
         if (!success) {
             revert DSCEngine__TransferFailed();
         }
-
-        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     function _getAccountInformation(address user)
@@ -420,5 +418,9 @@ contract DSCEngine is ReentrancyGuard {
 
     function getPrecision() external pure returns (uint256) {
         return PRECISION;
+    }
+
+    function getHealthFactor(address user) external view returns (uint256) {
+        return _healthFactor(user);
     }
 }
