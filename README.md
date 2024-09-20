@@ -52,9 +52,14 @@
     - Stateful Fuzzing 
 
 
+
 ## Issues: 
 - openzeppelin contracts import issue in vscode 
     - https://github.com/Cyfrin/foundry-full-course-cu/discussions/1780#discussioncomment-9651251
+- invariant test failing to setup
+    - Execute these commands ( Could be a cache issue)
+    - foundryup 
+    - forge clean 
 
 ## References: 
 - https://docs.chain.link/data-feeds/price-feeds/addresses?network=ethereum&page=1&search=ETH+%2F+USD
