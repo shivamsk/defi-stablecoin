@@ -16,16 +16,19 @@
 - forge install smartcontractkit/chainlink-brownie-contracts@1.2.0 --no-commit
 
 ## Commands
-- 
+- forge inspect DSCEngine methods
+    - prints all the methods in this contract
 
 ## Test
 - forge test
 - forge test --match-test testRevertsIfCollateralZero
 - forge test --match-test testRevertsIfCollateralZero -vvvv
+- forge test --match-test testRevertsIfCollateralZero -vv
 - forge test --fork-url $SEPOLIA_RPC_URL
 - forge coverage
 - forge coverage --report debug
     - To view the line items to add tests
+ 
 
 
 ## VSCode Setup
@@ -38,6 +41,7 @@
 - reentrant
 - indexed keyword in event
 - IERC20 - transfer vs transferFrom
+- memory vs storage 
 
 ## 
 - Fuzz Testing : 
