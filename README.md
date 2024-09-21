@@ -77,6 +77,8 @@
         - https://chatgpt.com/share/66e58e08-3c90-8008-b0c6-08e9bacd7b14
 - Invariant Testing 
     - https://book.getfoundry.sh/forge/invariant-testing
+- Audit Readiness Checklist 
+    - https://github.com/nascentxyz/simple-security-toolkit/blob/main/audit-readiness-checklist.md
 
 
 
