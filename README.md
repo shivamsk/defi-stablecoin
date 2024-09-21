@@ -79,6 +79,8 @@
     - https://book.getfoundry.sh/forge/invariant-testing
 - Audit Readiness Checklist 
     - https://github.com/nascentxyz/simple-security-toolkit/blob/main/audit-readiness-checklist.md
+- Social Platform like Twitter - To integrate contracts 
+    - https://www.lens.xyz/docs
 
 
 
