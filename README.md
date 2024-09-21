@@ -82,8 +82,6 @@
 - Social Platform like Twitter - To integrate contracts 
     - https://www.lens.xyz/docs
 
-
-
 ## Foundry
 
 **Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
