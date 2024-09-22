@@ -29,7 +29,9 @@
 - forge coverage --report debug
     - To view the line items to add tests
  
-
+## TODOs 
+ - Improve the code coverage 
+ - Fix the invariants Tests
 
 ## VSCode Setup
     - Install Solidity(Nomic) extension 
