@@ -33,6 +33,7 @@
  - Improve the code coverage 
  - Fix the invariants Tests
     - https://github.com/Cyfrin/foundry-full-course-cu/discussions/2441
+- Check L2 Setup 
 
 ## VSCode Setup
     - Install Solidity(Nomic) extension 
